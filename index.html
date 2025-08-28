@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azan - AI Image Generator</title>
+    <style>
+        :root {
+            --primary: #6c63ff;
+            --secondary: #4a44c9;
+            --dark: #272343;
+            --light: #ffffff;
+            --gray: #f3f3f3;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            margin-bottom: 30px;
+            box-shadow: var(--box-shadow);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .input-section {
+            background: var(--light);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .output-section {
+            background: var(--light);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            resize: vertical;
+            min-height: 120px;
+            font-size: 16px;
+        }
+
+        select, button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+        }
+
+        select {
+            background-color: var(--light);
+            border: 1px solid #ddd;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 16px;
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .ratio-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .ratio-option {
+            padding: 12px;
+            text-align: center;
+            background: var(--gray);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .ratio-option:hover {
+            background: #e5e5e5;
+        }
+
+        .ratio-option.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .image-preview {
+            flex: 1;
+            background-color: var(--gray);
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            min-height: 350px;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .image-placeholder {
+            color: #888;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .image-placeholder svg {
+            margin-bottom: 15px;
+            opacity: 0.6;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: var(--primary);
+            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Azan AI Image Generator</h1>
+            <p>Transform your text into stunning AI-generated images</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="main-content">
+            <div class="input-section">
+                <div class="form-group">
+                    <label for="prompt">Describe your image</label>
+                    <textarea id="prompt" placeholder="Enter a detailed description of the image you want to generate..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Select Aspect Ratio</label>
+                    <div class="ratio-options">
+                        <div class="ratio-option active" data-ratio="1:1">Square (1:1)</div>
+                        <div class="ratio-option" data-ratio="16:9">Landscape (16:9)</div>
+                        <div class="ratio-option" data-ratio="9:16">Portrait (9:16)</div>
+                    </div>
+                </div>
+
+                <button id="generate-btn">Generate Image</button>
+            </div>
+
+            <div class="output-section">
+                <div class="image-preview">
+                    <div class="image-placeholder">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21,15 16,10 5,21"></polyline>
+                        </svg>
+                        <p>Your generated image will appear here</p>
+                    </div>
+                </div>
+                
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Generating your image... This may take a few moments.</p>
+                </div>
+                
+                <button id="download-btn" disabled>Download Image</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>Created by Azan | AI Image Generator</p>
+        </div>
+    </footer>
+
+    <div class="notification" id="notification">Image generated successfully!</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const promptInput = document.getElementById('prompt');
+            const generateBtn = document.getElementById('generate-btn');
+            const downloadBtn = document.getElementById('download-btn');
+            const ratioOptions = document.querySelectorAll('.ratio-option');
+            const imagePreview = document.querySelector('.image-preview');
+            const imagePlaceholder = document.querySelector('.image-placeholder');
+            const loadingElement = document.querySelector('.loading');
+            const notification = document.getElementById('notification');
+            
+            // Variables
+            let selectedRatio = '1:1';
+            let generatedImage = null;
+            
+            // Ratio selection
+            ratioOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    ratioOptions.forEach(opt => opt.classList.remove('active'));
+                    this.classList.add('active');
+                    selectedRatio = this.getAttribute('data-ratio');
+                });
+            });
+            
+            // Generate image
+            generateBtn.addEventListener('click', function() {
+                const prompt = promptInput.value.trim();
+                
+                if (!prompt) {
+                    showNotification('Please enter a description first');
+                    return;
+                }
+                
+                // Disable generate button and show loading
+                generateBtn.disabled = true;
+                loadingElement.style.display = 'block';
+                imagePlaceholder.style.display = 'none';
+                
+                // In a real implementation, you would call the HuggingFace API here
+                // This is a simulation of the API call
+                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(prompt, selectedRatio)
+                    .then(imageUrl => {
+                        // Display the generated image
+                        displayGeneratedImage(imageUrl);
+                        
+                        // Enable download button
+                        downloadBtn.disabled = false;
+                        
+                        // Show success notification
+                        showNotification('Image generated successfully!');
+                    })
+                    .catch(error => {
+                        showNotification('Error generating image. Please try again.');
+                        console.error('API Error:', error);
+                    })
+                    .finally(() => {
+                        // Re-enable generate button and hide loading
+                        generateBtn.disabled = false;
+                        loadingElement.style.display = 'none';
+                    });
+            });
+            
+            // Download image
+            downloadBtn.addEventListener('click', function() {
+                if (generatedImage) {
+                    const link = document.createElement('a');
+                    link.href = generatedImage;
+                    link.download = 'azan-ai-image.jpg';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            });
+            
+            // Simulate API call (replace with actual HuggingFace API integration)
+            function simulateAPICall(prompt, ratio) {
+                return new Promise((resolve, reject) => {
+                    // Simulate API processing time
+                    setTimeout(() => {
+                        // In a real implementation, this would be the response from HuggingFace
+                        // For demo purposes, we're using a placeholder image from picsum.photos
+                        const ratioDimensions = {
+                            '1:1': '600/600',
+                            '16:9': '800/450',
+                            '9:16': '450/800'
+                        };
+                        
+                        // Use a placeholder image service for demonstration
+                        // In production, you would use the actual image from the API response
+                        const imageUrl = `https://picsum.photos/${ratioDimensions[ratio]}?random=${Math.random()}`;
+                        
+                        // Simulate occasional failure
+                        if (Math.random() < 0.1) {
+                            reject('API rate limit exceeded');
+                        } else {
+                            resolve(imageUrl);
+                        }
+                    }, 2000); // Simulate 2 seconds processing time
+                });
+            }
+            
+            // Display the generated image
+            function displayGeneratedImage(imageUrl) {
+                // Remove previous image if exists
+                const existingImage = imagePreview.querySelector('img');
+                if (existingImage) {
+                    existingImage.remove();
+                }
+                
+                // Create and append new image
+                const img = document.createElement('img');
+                img.src = imageUrl;
+                img.alt = 'Generated image';
+                imagePreview.appendChild(img);
+                
+                // Store reference to generated image
+                generatedImage = imageUrl;
+            }
+            
+            // Show notification
+            function showNotification(message) {
+                notification.textContent = message;
+                notification.classList.add('show');
+                
+                // Hide notification after 3 seconds
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
