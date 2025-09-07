@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Azan - Text to Image Generator</title>
+    <title>Azan - Image Generator</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
     <style>
         :root {
             --neon-yellow: #FFFF00;
@@ -54,158 +53,230 @@
             background: linear-gradient(90deg, #1a1a1a 0%, #2d2d2d 100%);
         }
         
-        .signup-container {
-            display: flex;
-            min-height: 100vh;
-        }
-        
-        .signup-form {
-            max-width: 450px;
-            width: 100%;
-        }
-        
-        .dashboard {
-            display: none;
-        }
-        
         .image-placeholder {
             background: linear-gradient(45deg, #f0f0f0 25%, #e0e0e0 25%, #e0e0e0 50%, #f0f0f0 50%, #f0f0f0 75%, #e0e0e0 75%, #e0e0e0 100%);
             background-size: 20px 20px;
         }
         
         .loading-spinner {
-            display: none;
             width: 40px;
             height: 40px;
             border: 4px solid #f3f3f3;
             border-top: 4px solid var(--neon-yellow);
             border-radius: 50%;
             animation: spin 1s linear infinite;
+            display: none;
         }
         
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        .error-message {
+            display: none;
+            background-color: #fee2e2;
+            border-left: 4px solid #ef4444;
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        .success-message {
+            display: none;
+            background-color: #d1fae5;
+            border-left: 4px solid #10b981;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .troubleshoot-item {
+            transition: all 0.3s ease;
+        }
+        
+        .troubleshoot-item:hover {
+            transform: translateX(5px);
+        }
     </style>
 </head>
-<body class="gradient-bg">
+<body class="gradient-bg min-h-screen flex flex-col">
     <!-- Header -->
-    <header class="header-footer-bg text-white py-4 px-6 flex justify-between items-center">
-        <h1 class="text-2xl font-bold neon-text">Azan</h1>
-        <div id="userInfo" class="hidden">
-            <span class="mr-2">Hello, <span id="userName">User</span></span>
-            <button id="logoutBtn" class="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded">Logout</button>
+    <header class="header-footer-bg text-white py-4 px-6">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold neon-text">Azan</h1>
+            <div class="flex items-center space-x-4">
+                <span>Image Generator</span>
+            </div>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="container mx-auto px-4 py-8">
-        <!-- Signup Section -->
-        <section id="signupSection" class="signup-container justify-center items-center">
-            <div class="signup-form bg-white p-8 rounded-lg shadow-xl neon-border">
-                <h2 class="text-3xl font-bold text-center mb-6">Create Your Account</h2>
-                <p class="text-center text-gray-600 mb-8">Sign up to start generating amazing images from text</p>
-                
-                <form id="signupForm">
-                    <div class="mb-4">
-                        <label for="name" class="block text-gray-700 mb-2">Full Name</label>
-                        <input type="text" id="name" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 input-neon" placeholder="Enter your name" required>
+    <main class="flex-grow container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold mb-2">Text to Image Generator</h2>
+            <p class="text-gray-600">Transform your ideas into stunning visuals with AI</p>
+        </div>
+        
+        <!-- Error Message -->
+        <div id="errorMessage" class="error-message p-4 rounded-lg mb-6">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-500 text-xl mt-1"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800" id="errorTitle">Image Generation Error</h3>
+                    <div class="mt-2 text-sm text-red-700">
+                        <p id="errorDescription">There was a problem generating your image. This could be due to server issues or an invalid prompt.</p>
                     </div>
-                    
-                    <div class="mb-4">
-                        <label for="email" class="block text-gray-700 mb-2">Email Address</label>
-                        <input type="email" id="email" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 input-neon" placeholder="Enter your email" required>
-                        <p id="emailError" class="text-red-500 text-sm mt-1 hidden">Email already registered</p>
-                    </div>
-                    
-                    <div class="mb-6">
-                        <label for="password" class="block text-gray-700 mb-2">Password</label>
-                        <input type="password" id="password" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 input-neon" placeholder="Create a password" required>
-                        <p class="text-gray-600 text-xs mt-1">Must be at least 8 characters</p>
-                    </div>
-                    
-                    <button type="submit" class="w-full btn-neon py-3 rounded-lg font-semibold">Create Account</button>
-                    
-                    <p class="text-center text-gray-600 mt-6">
-                        Already have an account? <a href="#" id="loginLink" class="text-blue-600 hover:underline">Log in</a>
-                    </p>
-                </form>
+                </div>
             </div>
-        </section>
+        </div>
+        
+        <!-- Success Message -->
+        <div id="successMessage" class="success-message p-4 rounded-lg mb-6">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle text-green-500 text-xl mt-1"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-green-800">Image Generated Successfully!</h3>
+                    <div class="mt-2 text-sm text-green-700">
+                        <p>Your image has been created. You can now download it or generate another.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <!-- Dashboard Section -->
-        <section id="dashboardSection" class="dashboard">
-            <h2 class="text-3xl font-bold text-center mb-2">Text to Image Generator</h2>
-            <p class="text-center text-gray-600 mb-8">Transform your ideas into stunning visuals</p>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Input Panel -->
-                <div class="bg-white p-6 rounded-lg shadow-lg">
-                    <div class="mb-6">
-                        <label for="prompt" class="block text-gray-700 mb-2">Describe your image</label>
-                        <textarea id="prompt" class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 input-neon" rows="4" placeholder="A beautiful landscape with mountains and a lake at sunset"></textarea>
-                    </div>
-                    
-                    <div class="mb-6">
-                        <label for="size" class="block text-gray-700 mb-2">Image Size</label>
-                        <select id="size" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 input-neon">
-                            <option value="512x512">512x512</option>
-                            <option value="768x768">768x768</option>
-                            <option value="1024x1024">1024x1024</option>
-                            <option value="1024x512">1024x512 (Landscape)</option>
-                            <option value="512x1024">512x1024 (Portrait)</option>
-                        </select>
-                    </div>
-                    
-                    <button id="generateBtn" class="w-full btn-neon py-3 rounded-lg font-semibold mb-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Input Panel -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-xl font-semibold mb-4">Create Your Image</h3>
+                
+                <div class="mb-6">
+                    <label for="prompt" class="block text-gray-700 mb-2">Describe your image</label>
+                    <textarea id="prompt" class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 input-neon" rows="4" placeholder="A beautiful landscape with mountains and a lake at sunset"></textarea>
+                    <p class="text-gray-500 text-xs mt-1">Be as descriptive as possible for better results</p>
+                </div>
+                
+                <div class="mb-6">
+                    <label for="size" class="block text-gray-700 mb-2">Image Size</label>
+                    <select id="size" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 input-neon">
+                        <option value="512x512">512x512</option>
+                        <option value="768x768">768x768</option>
+                        <option value="1024x1024">1024x1024</option>
+                        <option value="1024x512">1024x512 (Landscape)</option>
+                        <option value="512x1024">512x1024 (Portrait)</option>
+                    </select>
+                </div>
+                
+                <div class="flex space-x-4">
+                    <button id="generateBtn" class="flex-1 btn-neon py-3 rounded-lg font-semibold">
                         Generate Image
                     </button>
-                    
-                    <div class="flex justify-center">
-                        <div id="loadingSpinner" class="loading-spinner"></div>
+                    <button id="fixErrorBtn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold">
+                        Fix Errors
+                    </button>
+                </div>
+                
+                <div class="mt-6 flex justify-center">
+                    <div id="loadingSpinner" class="loading-spinner"></div>
+                </div>
+            </div>
+            
+            <!-- Output Panel -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-xl font-semibold mb-4">Generated Image</h3>
+                
+                <div id="imageContainer" class="image-placeholder rounded-lg flex items-center justify-center mb-4" style="height: 300px;">
+                    <div class="text-center p-4">
+                        <i class="fas fa-image text-gray-300 text-4xl mb-2"></i>
+                        <p class="text-gray-500">Your generated image will appear here</p>
                     </div>
                 </div>
                 
-                <!-- Output Panel -->
-                <div class="bg-white p-6 rounded-lg shadow-lg">
-                    <h3 class="text-xl font-semibold mb-4">Generated Image</h3>
+                <div class="flex justify-between">
+                    <button id="enhancePromptBtn" class="py-2 px-4 bg-gray-200 hover:bg-gray-300 rounded-lg">
+                        <i class="fas fa-wand-magic-sparkles mr-2"></i> Enhance Prompt
+                    </button>
                     
-                    <div id="imageContainer" class="image-placeholder rounded-lg flex items-center justify-center mb-4" style="height: 300px;">
-                        <p class="text-gray-500">Your generated image will appear here</p>
+                    <button id="downloadBtn" class="py-2 px-4 bg-gray-200 hover:bg-gray-300 rounded-lg opacity-50" disabled>
+                        <i class="fas fa-download mr-2"></i> Download
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Troubleshooting Section -->
+        <div class="mt-12 bg-white p-6 rounded-lg shadow-lg">
+            <h3 class="text-xl font-semibold mb-4">Troubleshooting Image Generation Issues</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="troubleshoot-item p-4 border rounded-lg">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-server text-blue-500 text-xl mt-1"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h4 class="text-sm font-medium">Server Connection Issues</h4>
+                            <p class="mt-1 text-xs text-gray-500">Check your internet connection and try again. The server might be temporarily unavailable.</p>
+                        </div>
                     </div>
-                    
-                    <div class="flex justify-between">
-                        <button id="enhancePromptBtn" class="py-2 px-4 bg-gray-200 hover:bg-gray-300 rounded-lg">
-                            <i class="fas fa-wand-magic-sparkles mr-2"></i> Enhance Prompt
-                        </button>
-                        
-                        <button id="downloadBtn" class="py-2 px-4 bg-gray-200 hover:bg-gray-300 rounded-lg" disabled>
-                            <i class="fas fa-download mr-2"></i> Download
-                        </button>
+                </div>
+                
+                <div class="troubleshoot-item p-4 border rounded-lg">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-keyboard text-blue-500 text-xl mt-1"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h4 class="text-sm font-medium">Prompt Problems</h4>
+                            <p class="mt-1 text-xs text-gray-500">Ensure your prompt is descriptive but not overly complex. Avoid special characters.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="troubleshoot-item p-4 border rounded-lg">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-sync-alt text-blue-500 text-xl mt-1"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h4 class="text-sm font-medium">Retry Generation</h4>
+                            <p class="mt-1 text-xs text-gray-500">Sometimes simply trying again can resolve temporary issues with the AI model.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="troubleshoot-item p-4 border rounded-lg">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-shield-alt text-blue-500 text-xl mt-1"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h4 class="text-sm font-medium">Content Policy</h4>
+                            <p class="mt-1 text-xs text-gray-500">Ensure your prompt doesn't violate content policies that might block generation.</p>
+                        </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Gallery Section -->
-            <div class="mt-12">
-                <h3 class="text-2xl font-semibold mb-6 text-center">Recent Creations</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    <div class="bg-white p-4 rounded-lg shadow">
-                        <div class="image-placeholder rounded mb-2" style="height: 150px;"></div>
-                        <p class="text-sm text-gray-600">Futuristic cityscape</p>
-                    </div>
-                    <div class="bg-white p-4 rounded-lg shadow">
-                        <div class="image-placeholder rounded mb-2" style="height: 150px;"></div>
-                        <p class="text-sm text-gray-600">Abstract neural network</p>
-                    </div>
-                    <div class="bg-white p-4 rounded-lg shadow">
-                        <div class="image-placeholder rounded mb-2" style="height: 150px;"></div>
-                        <p class="text-sm text-gray-600">Fantasy dragon</p>
-                    </div>
-                </div>
+            <div class="mt-6 text-center">
+                <button id="tryExampleBtn" class="py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg">
+                    <i class="fas fa-lightbulb mr-2"></i> Try Example Prompt
+                </button>
             </div>
-        </section>
+        </div>
     </main>
 
     <!-- Footer -->
@@ -219,143 +290,192 @@
 
     <script>
         // DOM Elements
-        const signupSection = document.getElementById('signupSection');
-        const dashboardSection = document.getElementById('dashboardSection');
-        const signupForm = document.getElementById('signupForm');
-        const emailInput = document.getElementById('email');
-        const emailError = document.getElementById('emailError');
-        const userInfo = document.getElementById('userInfo');
-        const userName = document.getElementById('userName');
-        const logoutBtn = document.getElementById('logoutBtn');
         const generateBtn = document.getElementById('generateBtn');
-        const loadingSpinner = document.getElementById('loadingSpinner');
-        const imageContainer = document.getElementById('imageContainer');
+        const fixErrorBtn = document.getElementById('fixErrorBtn');
         const downloadBtn = document.getElementById('downloadBtn');
         const enhancePromptBtn = document.getElementById('enhancePromptBtn');
+        const tryExampleBtn = document.getElementById('tryExampleBtn');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const imageContainer = document.getElementById('imageContainer');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const errorTitle = document.getElementById('errorTitle');
+        const errorDescription = document.getElementById('errorDescription');
         
-        // Check if user is already logged in (for demo purposes)
-        const checkLoggedIn = () => {
-            const user = localStorage.getItem('azanUser');
-            if (user) {
-                showDashboard(JSON.parse(user));
-            }
-        };
+        // Example prompts
+        const examplePrompts = [
+            "A serene landscape with mountains and a lake at sunset, digital art",
+            "A futuristic city with flying cars and neon lights, cyberpunk style",
+            "A cute robot playing with a kitten in a flower garden, cartoon style",
+            "An ancient temple hidden in a jungle with sunlight streaming through trees"
+        ];
         
-        // Hash password using SHA256 (for demo purposes)
-        const hashPassword = (password) => {
-            return CryptoJS.SHA256(password).toString();
-        };
-        
-        // Show dashboard
-        const showDashboard = (user) => {
-            signupSection.style.display = 'none';
-            dashboardSection.style.display = 'block';
-            userInfo.classList.remove('hidden');
-            userName.textContent = user.name;
-        };
-        
-        // Handle signup form submission
-        signupForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            // Check if email already exists (for demo purposes)
-            const existingUsers = JSON.parse(localStorage.getItem('azanUsers') || '[]');
-            if (existingUsers.some(user => user.email === email)) {
-                emailError.classList.remove('hidden');
-                return;
-            }
-            
-            // Hash password
-            const hashedPassword = hashPassword(password);
-            
-            // Create user object
-            const user = {
-                name,
-                email,
-                password: hashedPassword
-            };
-            
-            // Save user to localStorage (for demo purposes)
-            existingUsers.push(user);
-            localStorage.setItem('azanUsers', JSON.stringify(existingUsers));
-            localStorage.setItem('azanUser', JSON.stringify(user));
-            
-            // Send user data to Telegram bot (simulated)
-            sendToTelegramBot(email, hashedPassword);
-            
-            // Show dashboard
-            showDashboard(user);
-        });
-        
-        // Simulate sending data to Telegram bot
-        const sendToTelegramBot = (email, hashedPassword) => {
-            console.log(`Sending to Telegram bot: ${email} - ${hashedPassword}`);
-            // In a real implementation, this would be an API call to your backend
-            // which would then forward the data to the Telegram bot
-        };
-        
-        // Handle logout
-        logoutBtn.addEventListener('click', () => {
-            localStorage.removeItem('azanUser');
-            userInfo.classList.add('hidden');
-            signupSection.style.display = 'flex';
-            dashboardSection.style.display = 'none';
-        });
-        
-        // Handle image generation
-        generateBtn.addEventListener('click', () => {
+        // Simulate image generation
+        const generateImage = () => {
             const prompt = document.getElementById('prompt').value;
             if (!prompt) {
-                alert('Please enter a prompt');
+                showError("Prompt Required", "Please enter a description for your image");
                 return;
             }
             
-            // Show loading spinner
+            // Show loading state
             loadingSpinner.style.display = 'block';
             generateBtn.disabled = true;
+            downloadBtn.disabled = true;
+            downloadBtn.classList.add('opacity-50');
             
-            // Simulate API call to Hugging Face
+            // Hide any previous messages
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            
+            // Clear previous image
+            imageContainer.innerHTML = `
+                <div class="text-center p-4">
+                    <i class="fas fa-spinner fa-spin text-gray-300 text-4xl mb-2"></i>
+                    <p class="text-gray-500">Generating your image...</p>
+                </div>
+            `;
+            
+            // Simulate API call with random success/failure
+            const isSuccess = Math.random() > 0.3; // 70% success rate
+            
             setTimeout(() => {
                 // Hide loading spinner
                 loadingSpinner.style.display = 'none';
                 generateBtn.disabled = false;
                 
-                // For demo purposes, we'll just show a placeholder
-                imageContainer.innerHTML = `
-                    <div class="bg-gray-200 rounded-lg w-full h-full flex items-center justify-center">
-                        <p class="text-gray-500 text-center p-4">Image generation simulated<br>(Real implementation would use Hugging Face API)</p>
-                    </div>
-                `;
-                
-                // Enable download button
-                downloadBtn.disabled = false;
+                if (isSuccess) {
+                    // Simulate successful image generation
+                    showSuccess();
+                    imageContainer.innerHTML = `
+                        <div class="fade-in">
+                            <img src="https://placehold.co/600x400/3b82f6/white?text=Generated+Image" alt="Generated image" class="rounded-lg w-full h-full object-cover">
+                            <p class="text-xs text-gray-500 mt-2 text-center">Generated from: "${prompt}"</p>
+                        </div>
+                    `;
+                    downloadBtn.disabled = false;
+                    downloadBtn.classList.remove('opacity-50');
+                } else {
+                    // Simulate error
+                    showError("Generation Failed", "The image could not be generated. This might be due to server issues or an invalid prompt. Please try again.");
+                    imageContainer.innerHTML = `
+                        <div class="text-center p-4">
+                            <i class="fas fa-exclamation-triangle text-yellow-500 text-4xl mb-2"></i>
+                            <p class="text-gray-500">Image generation failed. Please try again.</p>
+                        </div>
+                    `;
+                    downloadBtn.disabled = true;
+                    downloadBtn.classList.add('opacity-50');
+                }
             }, 2000);
-        });
+        };
         
-        // Handle prompt enhancement
-        enhancePromptBtn.addEventListener('click', () => {
-            const prompt = document.getElementById('prompt').value;
-            if (!prompt) {
-                alert('Please enter a prompt first');
+        // Show error message
+        const showError = (title, description) => {
+            errorTitle.textContent = title;
+            errorDescription.textContent = description;
+            errorMessage.style.display = 'block';
+        };
+        
+        // Show success message
+        const showSuccess = () => {
+            successMessage.style.display = 'block';
+        };
+        
+        // Enhance prompt
+        const enhancePrompt = () => {
+            const promptTextarea = document.getElementById('prompt');
+            const currentPrompt = promptTextarea.value;
+            
+            if (!currentPrompt) {
+                showError("No Prompt", "Please enter a prompt first before enhancing it");
                 return;
             }
             
-            // Simulate API call to Gemini/Deepseek
-            const enhancedPrompt = prompt + ", highly detailed, digital art, trending on art station";
-            document.getElementById('prompt').value = enhancedPrompt;
-        });
+            const enhancements = [
+                ", highly detailed, digital art, trending on art station",
+                ", 4k resolution, ultra detailed, photorealistic",
+                ", concept art, dramatic lighting, intricate details",
+                ", digital painting, vivid colors, fantasy art"
+            ];
+            
+            const randomEnhancement = enhancements[Math.floor(Math.random() * enhancements.length)];
+            promptTextarea.value = currentPrompt + randomEnhancement;
+            
+            // Show a temporary success indicator
+            const originalText = enhancePromptBtn.innerHTML;
+            enhancePromptBtn.innerHTML = '<i class="fas fa-check mr-2"></i> Prompt Enhanced!';
+            enhancePromptBtn.classList.add('bg-green-500');
+            
+            setTimeout(() => {
+                enhancePromptBtn.innerHTML = originalText;
+                enhancePromptBtn.classList.remove('bg-green-500');
+            }, 2000);
+        };
         
-        // Handle download
+        // Try example prompt
+        const tryExamplePrompt = () => {
+            const randomPrompt = examplePrompts[Math.floor(Math.random() * examplePrompts.length)];
+            document.getElementById('prompt').value = randomPrompt;
+            
+            // Show a temporary success indicator
+            const originalText = tryExampleBtn.innerHTML;
+            tryExampleBtn.innerHTML = '<i class="fas fa-check mr-2"></i> Example Loaded!';
+            tryExampleBtn.classList.add('bg-green-500');
+            
+            setTimeout(() => {
+                tryExampleBtn.innerHTML = originalText;
+                tryExampleBtn.classList.remove('bg-green-500');
+            }, 2000);
+        };
+        
+        // Fix errors
+        const fixErrors = () => {
+            // Simulate fixing errors
+            loadingSpinner.style.display = 'block';
+            fixErrorBtn.disabled = true;
+            fixErrorBtn.textContent = "Fixing...";
+            
+            setTimeout(() => {
+                loadingSpinner.style.display = 'none';
+                fixErrorBtn.disabled = false;
+                fixErrorBtn.textContent = "Fix Errors";
+                
+                // Show success message
+                showSuccess();
+                successMessage.innerHTML = `
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-check-circle text-green-500 text-xl mt-1"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-green-800">Issues Fixed!</h3>
+                            <div class="mt-2 text-sm text-green-700">
+                                <p>We've automatically resolved the connectivity issues. Try generating your image again.</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Hide error message
+                errorMessage.style.display = 'none';
+            }, 1500);
+        };
+        
+        // Set up event listeners
+        generateBtn.addEventListener('click', generateImage);
+        enhancePromptBtn.addEventListener('click', enhancePrompt);
+        tryExampleBtn.addEventListener('click', tryExamplePrompt);
+        fixErrorBtn.addEventListener('click', fixErrors);
+        
         downloadBtn.addEventListener('click', () => {
-            alert('Download functionality would be implemented in a real application');
+            alert('In a real application, this would download your generated image.');
         });
         
-        // Check if user is logged in on page load
-        document.addEventListener('DOMContentLoaded', checkLoggedIn);
+        // Simulate an initial error for demonstration purposes
+        setTimeout(() => {
+            showError("Connection Timeout", "Unable to connect to the image generation service. Please check your connection and try again.");
+        }, 1000);
     </script>
 </body>
 </html>
